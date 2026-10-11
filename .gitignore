@@ -1,0 +1,10 @@
+.DS_Store
+.env
+.env.*
+*.log
+.clasp.json
+.clasprc.json
+secrets.json
+credentials.json
+private/
+exports/

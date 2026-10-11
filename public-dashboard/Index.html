@@ -1,0 +1,315 @@
+<!doctype html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Command Center</title>
+  <?!= ccInclude_('Styles'); ?>
+</head>
+<body data-default-mode="portfolio" class="public-app">
+  <div id="loadBar" class="load-bar" aria-hidden="true"></div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div>
+        <div class="brand">COMMAND<br>CENTER</div>
+        <div class="brand-sub">E-commerce Intelligence</div>
+      </div>
+
+      <nav>
+        <button id="navOverview" class="nav-item active" type="button" data-view="overview">Overview</button>
+        <button id="navSales" class="nav-item" type="button" data-view="sales">Sales</button>
+        <button id="navProducts" class="nav-item" type="button" data-view="products">Products</button>
+        <button id="navInventory" class="nav-item" type="button" data-view="inventory">Inventory</button>
+        <button id="navOperations" class="nav-item" type="button" data-view="operations">Operations</button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="source-title">DATA FROM SHOPIFY</div>
+        <div class="sync-mini"><span id="sideSyncDot" class="sync-dot"></span><div><strong>Last sync</strong><span id="sideSyncText">Cargando…</span></div></div>
+        <div class="public-mode-badge"><span class="public-mode-dot"></span>PORTFOLIO MODE</div>
+        <p id="modeNote" class="mode-note">Sanitized operational data · no raw commercial values.</p>
+        <div class="version"><?!= dashboardVersion ?></div>
+      </div>
+    </aside>
+
+    <main id="mainContent" class="main" aria-busy="false">
+      <header class="topbar">
+        <div>
+          <div id="pageEyebrow" class="eyebrow">OVERVIEW</div>
+          <h1 id="pageTitle">Overview</h1>
+          <p id="dashboardSubtitle" class="subtitle">A real-time view of your e-commerce business.</p>
+        </div>
+        <div class="controls">
+<div class="public-mode-badge public-mode-badge-mobile"><span class="public-mode-dot"></span>PORTFOLIO</div>
+          <select id="rangeSelect" aria-label="Rango de fechas">
+            <option value="month">Este mes</option>
+            <option value="7d">Últimos 7 días</option>
+            <option value="30d">Últimos 30 días</option>
+            <option value="ytd">Año 2026</option>
+          </select>
+          <div id="syncBox" class="sync-box" aria-live="polite"><span id="syncDot" class="sync-dot"></span><span id="syncText">Cargando…</span></div>
+        </div>
+      </header>
+
+      <div class="mobile-section-nav" role="navigation" aria-label="Dashboard sections">
+        <button id="mobileNavOverview" class="active" type="button" data-view="overview">Overview</button>
+        <button id="mobileNavSales" type="button" data-view="sales">Sales</button>
+        <button id="mobileNavProducts" type="button" data-view="products">Products</button>
+        <button id="mobileNavInventory" type="button" data-view="inventory">Inventory</button>
+        <button id="mobileNavOperations" type="button" data-view="operations">Operations</button>
+      </div>
+
+      <div id="overviewView" class="dashboard-view">
+        <section class="kpi-grid">
+          <article class="kpi">
+            <span>NET SALES</span>
+            <div class="kpi-body"><div><strong id="netSales">—</strong><small id="netSalesDelta">—</small></div><div id="sparkNetSales" class="sparkline"></div></div>
+          </article>
+          <article class="kpi">
+            <span>ORDERS</span>
+            <div class="kpi-body"><div><strong id="orders">—</strong><small id="ordersDelta">—</small></div><div id="sparkOrders" class="sparkline"></div></div>
+          </article>
+          <article class="kpi">
+            <span>AOV</span>
+            <div class="kpi-body"><div><strong id="aov">—</strong><small id="aovDelta">—</small></div><div id="sparkAov" class="sparkline"></div></div>
+          </article>
+          <article class="kpi">
+            <span>CONVERSION</span>
+            <div class="kpi-body"><div><strong id="conversion">—</strong><small id="conversionDelta">—</small></div><div id="sparkConversion" class="sparkline"></div></div>
+          </article>
+        </section>
+
+        <section class="mid-grid">
+          <article class="target-card">
+            <div class="section-head target-head">
+              <span class="section-label">MONTHLY TARGET</span>
+              <button id="editTargetBtn" class="target-edit-button">Editar meta</button>
+            </div>
+
+            <div class="target-content">
+              <div id="targetRing" class="target-ring">
+                <div class="target-ring-center">
+                  <strong id="targetProgress">—</strong>
+                  <span>of target</span>
+                </div>
+              </div>
+
+              <div class="target-info">
+                <div>
+                  <h2 id="targetHeadline">Meta no configurada</h2>
+                  <p id="targetDetail">Configura la meta mensual para medir el progreso comercial.</p>
+                </div>
+                <div class="target-progress-block">
+                  <div class="target-track"><div id="targetBar" class="target-bar"></div></div>
+                  <span id="targetCompletion" class="target-completion">—</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="target-stats">
+              <div><span>Current</span><strong id="targetCurrent">—</strong></div>
+              <div><span>Target</span><strong id="targetGoal">—</strong></div>
+              <div><span>Remaining</span><strong id="targetRemaining">—</strong></div>
+            </div>
+          </article>
+
+          <article class="sales-card">
+            <div class="panel-head">
+              <div><span class="section-label">SALES PERFORMANCE</span><h2 id="rangeLabel">—</h2><small id="rangeDates" class="range-dates">—</small></div>
+              <div class="legend"><span><i class="line current"></i>This period</span><span><i class="line previous"></i>Previous period</span></div>
+            </div>
+            <div id="chart" class="chart"></div>
+          </article>
+        </section>
+
+        <section class="bottom-grid">
+          <article class="panel top-products">
+            <div class="panel-head"><div><span id="topProductsLabel" class="section-label">TOP PRODUCTS</span><h2 id="topProductsTitle">By revenue</h2></div><span id="topProductsNote" class="panel-note">REAL data</span></div>
+            <div id="topProductsList" class="product-list"></div>
+          </article>
+
+          <article class="panel operations-panel">
+            <div class="panel-head"><div><span class="section-label">OPERATIONS</span><h2>What needs attention</h2></div><span class="panel-note" id="opsRangeLabel">—</span></div>
+            <div class="operations-grid">
+              <div class="op-card"><span>PENDING FULFILLMENT</span><strong id="pending">—</strong><small id="pendingNote">Current snapshot</small></div>
+              <div class="op-card"><span>CANCELLATIONS</span><strong id="cancellations">—</strong><small id="cancellationsDelta">—</small></div>
+              <div class="op-card"><span>REFUNDED ORDERS</span><strong id="refunded">—</strong><small id="refundedDelta">—</small></div>
+              <div class="op-card"><span>LOW STOCK ITEMS</span><strong id="lowStock">—</strong><small id="lowStockNote"><span id="outStock">—</span> out of stock · snapshot</small></div>
+            </div>
+          </article>
+        </section>
+      </div>
+
+      <div id="salesView" class="dashboard-view" hidden>
+        <section class="sales-summary-grid">
+          <article class="sales-summary-card">
+            <span>THIS PERIOD</span>
+            <strong id="salesPeriodValue">—</strong>
+            <small id="salesPeriodDelta">—</small>
+          </article>
+          <article class="sales-summary-card">
+            <span>ORDERS</span>
+            <strong id="salesOrdersValue">—</strong>
+            <small id="salesOrdersDelta">—</small>
+          </article>
+          <article class="sales-summary-card">
+            <span>AOV</span>
+            <strong id="salesAovValue">—</strong>
+            <small id="salesAovDelta">—</small>
+          </article>
+          <article class="sales-summary-card target-summary-card">
+            <span>MONTHLY TARGET</span>
+            <strong id="salesTargetValue">—</strong>
+            <small id="salesTargetNote">—</small>
+            <div class="sales-target-track"><i id="salesTargetBar"></i></div>
+          </article>
+        </section>
+
+        <section class="sales-focus-grid">
+          <article class="panel sales-deep-chart-panel">
+            <div class="panel-head">
+              <div><span class="section-label">SALES TREND</span><h2 id="salesRangeLabel">—</h2><small id="salesRangeDates" class="range-dates">—</small></div>
+              <div class="legend"><span><i class="line current"></i>This period</span><span><i class="line previous"></i>Previous period</span></div>
+            </div>
+            <div id="salesDeepChart" class="chart sales-deep-chart"></div>
+          </article>
+
+          <article class="panel sales-comparison-panel">
+            <div class="panel-head"><div><span class="section-label">PERIOD COMPARISON</span><h2>Current vs previous</h2></div><span id="salesCompareBadge" class="comparison-badge">—</span></div>
+            <div class="comparison-list">
+              <div><span>This period</span><strong id="salesCompareCurrent">—</strong></div>
+              <div><span>Previous period</span><strong id="salesComparePrevious">—</strong></div>
+              <div><span>Change</span><strong id="salesCompareChange">—</strong></div>
+              <div><span>Target progress</span><strong id="salesCompareTarget">—</strong></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="sales-insight-grid">
+          <article class="panel sales-highlights-panel">
+            <div class="panel-head"><div><span class="section-label">DAILY HIGHLIGHTS</span><h2>Strongest signals</h2></div><span class="panel-note">Selected period</span></div>
+            <div class="highlight-grid">
+              <div class="highlight-card"><span>BEST SALES DAY</span><strong id="bestSalesDay">—</strong><small id="bestSalesDayNote">—</small></div>
+              <div class="highlight-card"><span>HIGHEST ORDER ACTIVITY</span><strong id="bestOrdersDay">—</strong><small id="bestOrdersDayNote">—</small></div>
+              <div class="highlight-card"><span>STRONGEST CONVERSION DAY</span><strong id="bestConversionDay">—</strong><small id="bestConversionDayNote">—</small></div>
+            </div>
+          </article>
+
+          <article class="panel sales-rhythm-panel">
+            <div class="panel-head"><div><span class="section-label">RECENT SALES RHYTHM</span><h2>Latest activity</h2></div><span id="salesRhythmNote" class="panel-note">—</span></div>
+            <div id="salesRhythm" class="sales-rhythm-list"></div>
+          </article>
+        </section>
+      </div>
+
+      <div id="productsView" class="dashboard-view" hidden>
+        <section class="section-summary-grid">
+          <article class="section-summary-card"><span>ACTIVE PRODUCTS</span><strong id="productActiveProducts">—</strong><small>Current catalog</small></article>
+          <article class="section-summary-card"><span>ACTIVE VARIANTS</span><strong id="productActiveVariants">—</strong><small>Current catalog</small></article>
+          <article class="section-summary-card"><span id="productTypeCountLabel">PRODUCT TYPES</span><strong id="productTypeCount">—</strong><small>Active catalog</small></article>
+          <article class="section-summary-card"><span id="productLeadingTypeLabel">LEADING TYPE</span><strong id="productLeadingType" class="summary-text-value">—</strong><small id="productLeadingTypeNote">Selected period</small></article>
+        </section>
+
+        <section class="dual-view-grid">
+          <article class="panel view-panel-left">
+            <div class="panel-head"><div><span class="section-label">PRODUCT PERFORMANCE</span><h2 id="productsRankingTitle">Top products</h2></div><span id="productsRankingNote" class="panel-note">Selected period</span></div>
+            <div id="productsViewRanking" class="rank-list"></div>
+          </article>
+          <article class="panel view-panel-right">
+            <div class="panel-head"><div><span id="productTypePerformanceLabel" class="section-label">PRODUCT TYPE PERFORMANCE</span><h2>Current vs previous</h2></div><span id="productTypesPeriodNote" class="panel-note">—</span></div>
+            <div id="productTypesPerformance" class="signal-list"></div>
+          </article>
+        </section>
+
+        <section class="wide-panel-row">
+          <article class="panel wide-panel">
+            <div class="panel-head"><div><span class="section-label">PRODUCT MOMENTUM</span><h2>Signals from the selected period</h2></div><span class="panel-note">Relative movement</span></div>
+            <div class="insight-cards">
+              <div class="insight-card"><span id="productStrongestTypeLabel">STRONGEST TYPE</span><strong id="productStrongestType">—</strong><small id="productStrongestTypeNote">—</small></div>
+              <div class="insight-card"><span>IMPROVING</span><strong id="productImprovingCount">—</strong><small id="productImprovingNote">Product types trending up</small></div>
+              <div class="insight-card"><span>NEEDS ATTENTION</span><strong id="productAttentionCount">—</strong><small id="productAttentionNote">Product types trending down</small></div>
+            </div>
+          </article>
+        </section>
+      </div>
+
+      <div id="inventoryView" class="dashboard-view" hidden>
+        <section class="section-summary-grid">
+          <article class="section-summary-card"><span>ACTIVE VARIANTS</span><strong id="inventoryVariants">—</strong><small>Inventory scope</small></article>
+          <article class="section-summary-card"><span>AVAILABLE UNITS</span><strong id="inventoryAvailable">—</strong><small>Current snapshot</small></article>
+          <article class="section-summary-card"><span>COMMITTED</span><strong id="inventoryCommitted">—</strong><small>Current snapshot</small></article>
+          <article class="section-summary-card"><span>INVENTORY HEALTH</span><strong id="inventoryHealth" class="summary-text-value">—</strong><small id="inventoryHealthNote">Current snapshot</small></article>
+        </section>
+
+        <section class="dual-view-grid">
+          <article class="panel view-panel-left">
+            <div class="panel-head"><div><span class="section-label">STOCK MIX</span><h2>Healthy vs attention</h2></div><span id="inventoryMixNote" class="panel-note">Current snapshot</span></div>
+            <div id="inventoryStockMix" class="signal-list"></div>
+          </article>
+          <article class="panel view-panel-right">
+            <div class="panel-head"><div><span id="inventoryAttentionLabel" class="section-label">ATTENTION BY PRODUCT TYPE</span><h2>Where stock needs review</h2></div><span class="panel-note">Relative priority</span></div>
+            <div id="inventoryAttentionTypes" class="rank-list"></div>
+          </article>
+        </section>
+
+        <section class="wide-panel-row">
+          <article class="panel wide-panel">
+            <div class="panel-head"><div><span class="section-label">INVENTORY SIGNALS</span><h2>Current operational snapshot</h2></div><span id="inventoryScopeNote" class="panel-note">—</span></div>
+            <div class="insight-cards four">
+              <div class="insight-card"><span>LOW STOCK</span><strong id="inventoryLowStock">—</strong><small>Variants requiring attention</small></div>
+              <div class="insight-card"><span>OUT OF STOCK</span><strong id="inventoryOutStock">—</strong><small>Variants unavailable</small></div>
+              <div class="insight-card"><span>ON HAND</span><strong id="inventoryOnHand">—</strong><small>Total physical inventory</small></div>
+              <div class="insight-card"><span>LOW STOCK THRESHOLD</span><strong id="inventoryThreshold">—</strong><small>Configured rule</small></div>
+            </div>
+          </article>
+        </section>
+      </div>
+
+      <div id="operationsDetailView" class="dashboard-view" hidden>
+        <section class="section-summary-grid">
+          <article class="section-summary-card"><span>ORDERS IN PERIOD</span><strong id="operationsOrders">—</strong><small>Selected period</small></article>
+          <article class="section-summary-card"><span>FULFILLED</span><strong id="operationsFulfilled">—</strong><small>Selected period</small></article>
+          <article class="section-summary-card"><span>PENDING</span><strong id="operationsPending">—</strong><small>Selected period</small></article>
+          <article class="section-summary-card"><span>FULFILLMENT HEALTH</span><strong id="operationsHealth" class="summary-text-value">—</strong><small id="operationsHealthNote">Selected period</small></article>
+        </section>
+
+        <section class="dual-view-grid">
+          <article class="panel view-panel-left">
+            <div class="panel-head"><div><span class="section-label">ORDER PIPELINE</span><h2>Fulfillment distribution</h2></div><span class="panel-note">Selected period</span></div>
+            <div id="operationsPipeline" class="signal-list"></div>
+          </article>
+          <article class="panel view-panel-right">
+            <div class="panel-head"><div><span class="section-label">PERIOD SIGNALS</span><h2>Exceptions and movement</h2></div><span id="operationsPeriodNote" class="panel-note">—</span></div>
+            <div class="operations-signal-grid">
+              <div><span>CANCELLATIONS</span><strong id="operationsCancellations">—</strong><small id="operationsCancellationTrend">—</small></div>
+              <div><span>REFUNDED ORDERS</span><strong id="operationsRefunds">—</strong><small id="operationsRefundTrend">—</small></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="dual-view-grid operations-lower-grid">
+          <article class="panel view-panel-left">
+            <div class="panel-head"><div><span class="section-label">RECENT EXCEPTIONS</span><h2>Daily activity</h2></div><span class="panel-note">Latest days in period</span></div>
+            <div id="operationsExceptions" class="exception-list"></div>
+          </article>
+          <article class="panel view-panel-right">
+            <div class="panel-head"><div><span class="section-label">CURRENT SNAPSHOT</span><h2>What needs attention now</h2></div><span class="panel-note">Operational state</span></div>
+            <div class="snapshot-list">
+              <div><span>PENDING FULFILLMENT</span><strong id="operationsSnapshotPending">—</strong></div>
+              <div><span>LOW STOCK</span><strong id="operationsSnapshotLow">—</strong></div>
+              <div><span>OUT OF STOCK</span><strong id="operationsSnapshotOut">—</strong></div>
+            </div>
+          </article>
+        </section>
+      </div>
+
+      <footer><span>ShopifyQL + Admin GraphQL</span><span id="footerVersion">—</span></footer>
+    </main>
+  </div>
+
+  <div id="chartTooltip" class="chart-tooltip" hidden></div>
+  <div id="errorToast" class="error-toast" role="alert" aria-live="assertive" hidden><span id="errorToastText"></span><button id="retryBtn" type="button">Reintentar</button></div>
+  <?!= ccInclude_('Dashboard'); ?>
+</body>
+</html>
