@@ -12,6 +12,30 @@ Public dashboard:
 
 https://script.google.com/macros/s/AKfycbz2nLW6PCinA1p3scRjPijxPiwUTWxqGLp6l8n9qwKRpDkqdclZe4Ddmdx-haBD9ePs/exec
 
+## Screenshots
+
+All screenshots below come from the public Portfolio Mode and contain only masked, relative or anonymized data.
+
+### Overview
+
+![Overview of the public E-commerce Command Center](screenshots/overview.png)
+
+### Sales
+
+![Sales view with masked values and relative trends](screenshots/sales.png)
+
+### Products
+
+![Products view with anonymized product names](screenshots/products.png)
+
+### Inventory
+
+![Inventory view with masked stock values](screenshots/inventory.png)
+
+### Operations
+
+![Operations view with masked fulfillment values](screenshots/operations.png)
+
 ## The problem
 
 E-commerce teams work with many types of data: sales, orders, products, inventory and fulfillment.
