@@ -123,6 +123,10 @@ The public version hides or removes:
 
 The public version can still show trends, relative changes and anonymized information.
 
+## Analytics
+
+The public demo uses privacy-safe, anonymous usage analytics to understand page, section and date-range interactions. It does not send sales values, product names, order counts, revenue, conversion values, inventory quantities or other business data to Google Analytics 4.
+
 ## Data pipeline
 
 The pipeline updates Shopify data automatically.

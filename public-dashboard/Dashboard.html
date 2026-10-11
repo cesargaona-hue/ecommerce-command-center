@@ -2,6 +2,100 @@
 (function(){
   const $ = (id) => document.getElementById(id);
   const state = { range: 'month', mode: 'portfolio', view: 'overview', data: null, requestId: 0, slowTimer: null };
+  const GA_MEASUREMENT_ID = 'G-41S91JE8RZ';
+  const analytics = { resolved: false, enabled: false, pending: [] };
+  const analyticsSections = ['overview', 'sales', 'products', 'inventory', 'operations'];
+  const analyticsRanges = ['month', '7d', '30d', 'ytd'];
+
+  function readOwnerFlag(){
+    try{ return localStorage.getItem('cc_owner') === 'true'; }
+    catch(err){ return false; }
+  }
+
+  function resolveOwnerFlag(location){
+    const parameters=location && location.parameter ? location.parameter : {};
+    const rawOwner=Array.isArray(parameters.owner) ? parameters.owner[0] : parameters.owner;
+    const owner=rawOwner===undefined || rawOwner===null ? '' : String(rawOwner);
+
+    try{
+      if(owner==='1') localStorage.setItem('cc_owner','true');
+      if(owner==='0') localStorage.removeItem('cc_owner');
+    }catch(err){
+      // If storage is unavailable, the explicit owner parameter still applies to this page view.
+    }
+
+    if(owner==='1') return true;
+    if(owner==='0') return false;
+    return readOwnerFlag();
+  }
+
+  function sendAnalyticsEvent(name,params){
+    let safeParams={};
+    if(name==='section_view'){
+      const section=String(params && params.section_name || '');
+      if(analyticsSections.indexOf(section)<0)return;
+      safeParams={section_name:section};
+    }else if(name==='range_change'){
+      const range=String(params && params.range_name || '');
+      if(analyticsRanges.indexOf(range)<0)return;
+      safeParams={range_name:range};
+    }else{
+      return;
+    }
+
+    if(!analytics.resolved){
+      analytics.pending.push({name:name,params:safeParams});
+      return;
+    }
+    if(!analytics.enabled || typeof window.gtag!=='function')return;
+    window.gtag('event',name,safeParams);
+  }
+
+  function enableAnalytics(){
+    analytics.enabled=true;
+    window.dataLayer=window.dataLayer||[];
+    window.gtag=function(){ window.dataLayer.push(arguments); };
+    window.gtag('js',new Date());
+    window.gtag('config',GA_MEASUREMENT_ID);
+
+    try{
+      if(sessionStorage.getItem('cc_demo_session_started')!=='true'){
+        window.gtag('event','demo_session_start');
+        sessionStorage.setItem('cc_demo_session_started','true');
+      }
+    }catch(err){
+      // Storage restrictions should not prevent the public page view from being measured.
+    }
+
+    const queued=analytics.pending.splice(0);
+    if(!queued.some(event=>event.name==='section_view')){
+      window.gtag('event','section_view',{section_name:state.view});
+    }
+    queued.forEach(event=>window.gtag('event',event.name,event.params));
+
+    const script=document.createElement('script');
+    script.async=true;
+    script.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(GA_MEASUREMENT_ID);
+    document.head.appendChild(script);
+  }
+
+  function initializeAnalytics(){
+    try{
+      google.script.url.getLocation(function(location){
+        const isOwner=resolveOwnerFlag(location);
+        analytics.resolved=true;
+        if(isOwner){
+          analytics.pending.length=0;
+          return;
+        }
+        enableAnalytics();
+      });
+    }catch(err){
+      // Fail closed: never load analytics unless owner exclusion has been resolved.
+      analytics.resolved=true;
+      analytics.pending.length=0;
+    }
+  }
 
   function money(v){ return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(Number(v||0)); }
   function num(v){ return new Intl.NumberFormat('es-MX',{maximumFractionDigits:0}).format(Number(v||0)); }
@@ -652,9 +746,11 @@
   function setView(view){
     const allowed=['overview','sales','products','inventory','operations'];
     if(allowed.indexOf(view)<0)view='overview';
+    const changed=state.view!==view;
     state.view=view;
     setViewUi();
     $('mainContent').scrollTo({top:0,behavior:'smooth'});
+    if(changed) sendAnalyticsEvent('section_view',{section_name:view});
   }
 
   const viewBindings={
@@ -666,7 +762,13 @@
   };
   Object.keys(viewBindings).forEach(view=>viewBindings[view].forEach(id=>{ const btn=$(id); if(btn) btn.addEventListener('click',()=>setView(view)); }));
 
-  $('rangeSelect').addEventListener('change',e=>{state.range=e.target.value;load();});
+  $('rangeSelect').addEventListener('change',e=>{
+    const range=String(e.target.value||'');
+    if(analyticsRanges.indexOf(range)<0)return;
+    state.range=range;
+    sendAnalyticsEvent('range_change',{range_name:range});
+    load();
+  });
 
   function setMode(){ /* Public app is permanently locked to Portfolio Mode. */ }
   $('retryBtn').addEventListener('click',()=>load());
@@ -685,6 +787,7 @@
       .setCommandCenterMonthlyTarget(value);
   });
 
+  initializeAnalytics();
   setModeUi();
   load();
 })();
